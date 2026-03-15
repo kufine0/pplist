@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+
+{% block title %}系统配置 - 银豹库存管理{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="mb-0"><i class="bi bi-gear me-2"></i>系统配置</h3>
+</div>
+
+<!-- Messages -->
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endfor %}
+{% endif %}
+
+<div class="row g-4">
+    <!-- Store Management -->
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-shop me-2"></i>店铺管理</h5>
+            </div>
+            <div class="card-body">
+                <!-- Add Store Form -->
+                <form method="post" class="mb-4 p-3 bg-light rounded">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="add_store">
+                    <h6 class="mb-3">添加新店铺</h6>
+                    <div class="row g-2">
+                        <div class="col-md-4">
+                            <input type="text" name="name" class="form-control form-control-sm" placeholder="店铺名称" required>
+                        </div>
+                        <div class="col-md-4">
+                            <input type="text" name="app_id" class="form-control form-control-sm" placeholder="App ID" required>
+                        </div>
+                        <div class="col-md-3">
+                            <input type="text" name="app_key" class="form-control form-control-sm" placeholder="App Key" required>
+                        </div>
+                        <div class="col-md-1">
+                            <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-plus"></i></button>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Store List -->
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>名称</th>
+                                <th>App ID</th>
+                                <th>状态</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for store in stores %}
+                            <tr>
+                                <td>{{ store.name }}</td>
+                                <td><code class="small">{{ store.app_id|truncatechars:12 }}</code></td>
+                                <td>
+                                    {% if store.is_active %}
+                                    <span class="badge bg-success">启用</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">禁用</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <form method="post" class="d-inline">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="refresh_products_cache">
+                                        <input type="hidden" name="store_id" value="{{ store.id }}">
+                                        <button type="submit" class="btn btn-warning btn-sm" onclick="return confirm('确定刷新产品缓存?')">
+                                            <i class="bi bi-arrow-clockwise"></i> 刷新缓存
+                                        </button>
+                                    </form>
+                                    <form method="post" class="d-inline">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="delete_store">
+                                        <input type="hidden" name="store_id" value="{{ store.id }}">
+                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('确定删除?')">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Config -->
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-bell me-2"></i>通知配置</h5>
+            </div>
+            <div class="card-body">
+                <!-- Add Notification Form -->
+                <form method="post" class="mb-4 p-3 bg-light rounded">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="add_notification">
+                    <h6 class="mb-3">添加通知渠道</h6>
+                    <div class="row g-2">
+                        <div class="col-md-3">
+                            <select name="channel" class="form-select form-select-sm" required>
+                                <option value="telegram">Telegram</option>
+                                <option value="dingtalk">钉钉</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <input type="text" name="bot_token" class="form-control form-control-sm" placeholder="Bot Token">
+                        </div>
+                        <div class="col-md-4">
+                            <input type="text" name="chat_id" class="form-control form-control-sm" placeholder="Chat ID / Webhook">
+                        </div>
+                        <div class="col-md-1">
+                            <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-plus"></i></button>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Notification List -->
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>渠道</th>
+                                <th>配置</th>
+                                <th>状态</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for notif in notifications %}
+                            <tr>
+                                <td>
+                                    {% if notif.channel == 'telegram' %}
+                                    <i class="bi bi-telegram text-primary"></i> Telegram
+                                    {% else %}
+                                    <i class="bi bi-chat-dots text-success"></i> 钉钉
+                                    {% endif %}
+                                </td>
+                                <td class="small">
+                                    {% if notif.channel == 'telegram' %}
+                                    Token: {{ notif.bot_token|truncatechars:10 }}...
+                                    {% else %}
+                                    Webhook: {{ notif.webhook|truncatechars:20 }}...
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if notif.is_active %}
+                                    <span class="badge bg-success">启用</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">禁用</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <form method="post" class="d-inline">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="test_notification">
+                                        <input type="hidden" name="channel" value="{{ notif.channel }}">
+                                        <button type="submit" class="btn btn-info btn-sm">
+                                            <i class="bi bi-send"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

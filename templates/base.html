@@ -1,0 +1,176 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}银豹库存管理{% endblock %}</title>
+    <link href="{% static 'bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'bootstrap-icons.css' %}" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --secondary: #6B7280;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --light: #F9FAFB;
+            --dark: #1F2937;
+        }
+        body {
+            background-color: #F3F4F6;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(180deg, #1F2937 0%, #111827 100%);
+            box-shadow: 4px 0 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .sidebar .nav-link {
+            color: #9CA3AF;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin: 4px 12px;
+            transition: all 0.2s;
+        }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            background-color: rgba(79, 70, 229, 0.2);
+            color: #fff;
+        }
+        .sidebar .nav-link i {
+            margin-right: 10px;
+        }
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .stat-card {
+            background: linear-gradient(135deg, var(--primary) 0%, #6366F1 100%);
+            color: white;
+        }
+        .stat-card.success {
+            background: linear-gradient(135deg, var(--success) 0%, #34D399 100%);
+        }
+        .stat-card.warning {
+            background: linear-gradient(135deg, var(--warning) 0%, #FBBF24 100%);
+        }
+        .btn-primary {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+        .btn-primary:hover {
+            background-color: #4338CA;
+            border-color: #4338CA;
+        }
+        .table {
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .table thead {
+            background-color: #F9FAFB;
+        }
+        .badge-low-stock {
+            background-color: var(--danger);
+            color: white;
+        }
+        .badge-ok {
+            background-color: var(--success);
+            color: white;
+        }
+        .navbar {
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        .cache-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+        }
+        .cache-indicator.active {
+            background-color: var(--success);
+        }
+        .cache-indicator.inactive {
+            background-color: var(--danger);
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    {% if user.is_authenticated %}
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse show">
+                <div class="position-sticky pt-3">
+                    <div class="text-center mb-4">
+                        <h4 class="text-white">
+                            <i class="bi bi-box-seam"></i> 银豹库存
+                        </h4>
+                        <p class="text-muted small">Pospal Manager</p>
+                    </div>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}">
+                                <i class="bi bi-speedometer2"></i> 仪表盘
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.resolver_match.url_name == 'stock_flow' %}active{% endif %}" href="{% url 'stock_flow' %}">
+                                <i class="bi bi-arrow-left-right"></i> 库存流水
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.resolver_match.url_name == 'waybills' %}active{% endif %}" href="{% url 'waybills' %}">
+                                <i class="bi bi-receipt"></i> 未确认货单
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.resolver_match.url_name == 'create_flow' %}active{% endif %}" href="{% url 'create_flow' %}">
+                                <i class="bi bi-plus-circle"></i> 创建货流单
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.resolver_match.url_name == 'api_stats' %}active{% endif %}" href="{% url 'api_stats' %}">
+                                <i class="bi bi-graph-up"></i> API 统计
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.resolver_match.url_name == 'settings' %}active{% endif %}" href="{% url 'settings' %}">
+                                <i class="bi bi-gear"></i> 系统配置
+                            </a>
+                        </li>
+                    </ul>
+                    <div class="mt-4 px-3">
+                        <div class="d-flex align-items-center text-muted small">
+                            <i class="bi bi-person-circle me-2"></i>
+                            {{ user.username }}
+                        </div>
+                        <a href="{% url 'logout' %}" class="btn btn-outline-light btn-sm w-100 mt-2">
+                            <i class="bi bi-box-arrow-right"></i> 退出登录
+                        </a>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Main content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+    </div>
+    {% else %}
+    {% block auth_content %}{% endblock %}
+    {% endif %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+
+{% block title %}仪表盘 - 银豹库存管理{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="mb-0">仪表盘</h3>
+    <span class="text-muted">{{ request.user.username }}</span>
+</div>
+
+<!-- Stats Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="card stat-card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-white-50">店铺数量</h6>
+                        <h2 class="mb-0">{{ stores|length }}</h2>
+                    </div>
+                    <div class="fs-1 opacity-50">
+                        <i class="bi bi-shop"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card success h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-white-50">已缓存店铺</h6>
+                        <h2 class="mb-0">{{ cache_count }}</h2>
+                    </div>
+                    <div class="fs-1 opacity-50">
+                        <i class="bi bi-database"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card warning h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-white-50">今日 API 调用</h6>
+                        <h2 class="mb-0">{{ api_usage_today }}</h2>
+                    </div>
+                    <div class="fs-1 opacity-50">
+                        <i class="bi bi-cloud-download"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cache Status -->
+<div class="card mb-4">
+    <div class="card-header bg-white">
+        <h5 class="mb-0"><i class="bi bi-database me-2"></i>缓存状态</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>店铺</th>
+                        <th>缓存状态</th>
+                        <th>最后更新时间</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cache in cache_info %}
+                    <tr>
+                        <td>{{ cache.store }}</td>
+                        <td>
+                            {% if cache.has_cache %}
+                            <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>已缓存</span>
+                            {% else %}
+                            <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i>未缓存</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if cache.timestamp %}
+                            {{ cache.timestamp|date:"Y-m-d H:i:s" }}
+                            {% else %}
+                            <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row g-4">
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="bi bi-box text-primary fs-1"></i>
+                </div>
+                <h5>库存预警</h5>
+                <p class="text-muted small">查看各店铺低库存商品</p>
+                <a href="{% url 'inventory' %}" class="btn btn-primary">查看详情</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="bi bi-arrow-left-right text-success fs-1"></i>
+                </div>
+                <h5>库存流水</h5>
+                <p class="text-muted small">查询销售、入库等流水记录</p>
+                <a href="{% url 'stock_flow' %}" class="btn btn-success">查看详情</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="bi bi-gear text-warning fs-1"></i>
+                </div>
+                <h5>系统配置</h5>
+                <p class="text-muted small">管理店铺和通知配置</p>
+                <a href="{% url 'settings' %}" class="btn btn-warning">查看详情</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
