@@ -1,0 +1,30 @@
+{% extends "admin/base.html" %}
+
+{% block title %}日志查看{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <h1>日志查看</h1>
+    
+    <fieldset class="module aligned">
+        <div class="form-row">
+            <form method="get" style="display: inline;">
+                <label>显示行数:</label>
+                <select name="lines" onchange="this.form.submit()">
+                    <option value="50" {% if lines == '50' %}selected{% endif %}>50行</option>
+                    <option value="100" {% if lines == '100' %}selected{% endif %}>100行</option>
+                    <option value="200" {% if lines == '200' %}selected{% endif %}>200行</option>
+                    <option value="500" {% if lines == '500' %}selected{% endif %}>500行</option>
+                </select>
+            </form>
+            <a href="?lines={{ lines }}" class="btn btn-sm btn-secondary" style="margin-left: 10px;">刷新</a>
+        </div>
+    </fieldset>
+    
+    <fieldset class="module aligned">
+        <div class="form-row">
+            <textarea readonly style="width: 100%; height: 500px; font-family: monospace; font-size: 12px; white-space: pre-wrap;">{{ log_content }}</textarea>
+        </div>
+    </fieldset>
+</div>
+{% endblock %}

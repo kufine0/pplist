@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+
+{% block title %}仪表盘 - 银豹库存管理{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="mb-0">仪表盘</h3>
+    <span class="text-muted">{{ request.user.username }}</span>
+</div>
+
+<!-- Stats Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="card stat-card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-white-50">店铺数量</h6>
+                        <h2 class="mb-0">{{ stores|length }}</h2>
+                    </div>
+                    <div class="fs-1 opacity-50">
+                        <i class="bi bi-shop"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card success h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-white-50">店员数量</h6>
+                        <h2 class="mb-0">{{ clerk_count }}</h2>
+                    </div>
+                    <div class="fs-1 opacity-50">
+                        <i class="bi bi-people"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card warning h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-white-50">今日订单</h6>
+                        <h2 class="mb-0">{{ order_today }}</h2>
+                    </div>
+                    <div class="fs-1 opacity-50">
+                        <i class="bi bi-cart"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- 快捷入口 -->
+<div class="row g-4">
+    <div class="col-md-4">
+        <a href="{% url 'clerk_login' %}" class="text-decoration-none" target="_blank">
+            <div class="card stat-card h-100" style="background: linear-gradient(135deg, #EC4899 0%, #F472B6 100%);">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-white-50">进货前台</h6>
+                            <h5 class="mb-0">店员登录</h5>
+                        </div>
+                        <div class="fs-1 opacity-50">
+                            <i class="bi bi-box-arrow-right"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- 商品缓存管理 -->
+    <div class="col-md-8">
+        <div class="card h-100">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-database me-2"></i>商品缓存管理</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="text-muted small">缓存状态</div>
+                        {% if cache_status.has_cache %}
+                            <div class="text-success"><i class="bi bi-check-circle me-1"></i>已缓存</div>
+                        {% else %}
+                            <div class="text-warning"><i class="bi bi-exclamation-circle me-1"></i>未缓存</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <div class="text-muted small">商品数量</div>
+                        <div class="fw-bold">{{ cache_status.product_count }} 个</div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <div class="text-muted small">最后刷新时间</div>
+                        <div>{{ cache_status.refresh_time|default:"从未刷新" }}</div>
+                    </div>
+                </div>
+                <form method="post" action="{% url 'dashboard' %}" onsubmit="return confirm('确定要刷新商品缓存吗？')">
+                    {% csrf_token %}
+                    <input type="hidden" name="refresh_cache" value="1">
+                    <div class="d-flex gap-2 align-items-center mb-3">
+                        <select name="store_id" class="form-select" style="width: auto;">
+                            {% for store in stores %}
+                                <option value="{{ store.id }}">{{ store.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-arrow-clockwise me-1"></i>刷新缓存
+                        </button>
+                    </div>
+                </form>
+                <hr>
+                <form method="post" action="{% url 'dashboard' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="test_notification" value="1">
+                    <button type="submit" class="btn btn-outline-secondary">
+                        <i class="bi bi-bell me-1"></i>发送测试通知
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

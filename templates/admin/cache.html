@@ -1,0 +1,41 @@
+{% extends "admin/base.html" %}
+
+{% block title %}商品缓存管理{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <h1>商品缓存管理</h1>
+    
+    <fieldset class="module aligned">
+        <div class="form-row">
+            <strong>缓存状态:</strong>
+            {% if cache_status.has_cache %}
+            <span style="color: green;">已缓存 - {{ cache_status.product_count }} 个商品</span>
+            {% if cache_status.refresh_time %}
+            <br><span style="color: #666;">刷新时间: {{ cache_status.refresh_time }}</span>
+            {% endif %}
+            {% else %}
+            <span style="color: red;">未缓存</span>
+            {% endif %}
+        </div>
+    </fieldset>
+    
+    <fieldset class="module aligned">
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-row">
+                <label>选择店铺:</label>
+                <select name="store_id" required>
+                    {% for store in stores %}
+                    <option value="{{ store.id }}">{{ store.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="submit-row">
+                <input type="submit" value="刷新缓存" class="default">
+            </div>
+            <p>任选店铺调用API刷新共用缓存</p>
+        </form>
+    </fieldset>
+</div>
+{% endblock %}
